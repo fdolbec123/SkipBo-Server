@@ -18,6 +18,7 @@ socket_de_connexion.listen(4)
 print("Le server a démaré. \n En attente d'une connexion...")
 
 def threaded_client(conn):
+    conn.send(str.encode("Connecté!"))
     reply = ""
     while True:
         try:
