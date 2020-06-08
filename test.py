@@ -1,7 +1,10 @@
 import socket
 import pickle
-from _thread import *
-import sys
+# from _thread import *
+# import sys
+
+test_data = {1: "Test", 2: "Autre test"}
+
 
 class Network:
     def __init__(self):
@@ -18,12 +21,22 @@ class Network:
             return self.client.recv(2048).decode()
         except:
             pass
+
     def send(self, data):
+        a = True
         try:
             self.client.send(str.encode(data))
-            return self.client.recv(2048).decode()
+            while a:
+                if self.client.recv(2048).decode() == "get":
+                    self.client.send(str.encode("get"))
+                else:
+                    break
+                    # if self.client.recv(2048).decode() == "stop":
+                    # return self.client.recv(2048).decode()
         except socket.error as e:
             print(e)
 
+
 n = Network()
-print(n.send("Test"))
+# print(n.send("get"))
+n.send("stop")

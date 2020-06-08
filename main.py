@@ -3,7 +3,7 @@ from _thread import *
 # import pickle
 # import sys
 
-
+test_data2 = {1: "Test2", 2: "Autre test 2"}
 server = "192.168.100.195"
 port = 5555
 
@@ -17,12 +17,15 @@ except socket.error as e:
 socket_de_connexion.listen(4)
 print("Le server a démaré. \n En attente d'une connexion...")
 
+
+
 def threaded_client(conn):
+    i = 0
     conn.send(str.encode("Connecté!"))
     reply = ""
     while True:
         try:
-            data =  conn.recv(2048)
+            data = conn.recv(2048)
             reply = data.decode("utf-8")
             if not data:
                 print("Déconnecté")
@@ -30,11 +33,22 @@ def threaded_client(conn):
             else:
                 print("L'élément suivant a été reçu: ", reply)
                 print("Envoi de l'élément suivant: ", reply)
-            conn.sendall(str.encode(reply))
+            if data.decode("utf-8") == "get":
+                pass
+                # if i < 10:
+                #     conn.sendall(str.encode(reply))
+                #     i += 1
+                #     print(i)
+                # if i == 10:
+                #     conn.sendall(str.encode("stop"))
+                #     print("sending a stop signal")
+            else:
+                conn.sendall(str.encode(reply))
         except:
             break
     print("Connexion perdu")
     conn.close()
+
 
 while True:
     conn, addr = socket_de_connexion.accept()
