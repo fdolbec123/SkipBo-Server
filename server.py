@@ -124,7 +124,25 @@ while True:
                     print(to_send_to_j0)
                     depart = pickle.dumps(to_send_to_j0)
                     conn.send(depart)
+            elif data == "join":
+                print("in")
+                ask = pickle.dumps("code?")
+                conn.send(ask)
+                code_recu_pickled = conn.recv(2048)
+                code_recu = pickle.loads(code_recu_pickled)
+                print(code_recu)
+                verif = games.get(str(code_recu))
+                if verif is not None:
+                    print("yes")
+                    reponse = pickle.dumps("Yes")
+                    conn.send(reponse)
+                else:
+                    print("No")
+                    reponse = pickle.dumps("No")
+                    conn.send(reponse)
+                    conn.close()
 
         except:
             break
     print("Connexion perdu")
+    # conn.close()
