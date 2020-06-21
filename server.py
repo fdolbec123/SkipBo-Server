@@ -3,6 +3,7 @@ import pickle
 import random
 from _thread import *
 games = {}
+connexions = {}
 couleurs = ["Bleu", "Rouge", "Jaune", "Vert"]
 paquet_de_carte_initial = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -30,7 +31,6 @@ def code_invitation():
 
 
 def split_cards(nbre):
-    print("in")
     random.shuffle(paquet_de_carte_initial)
     random.shuffle(paquet_de_carte_initial)
     random.shuffle(paquet_de_carte_initial)
@@ -67,9 +67,9 @@ except socket.error as e:
 
 socket_de_connexion.listen(4)
 print("Le server a démaré. \n En attente d'une connexion...")
-while True:
-    conn, addr = socket_de_connexion.accept()
-    print("Connecté à: ", addr)
+
+
+def threaded_client(conn):
     msg = pickle.dumps("Connecté!")
     conn.send(msg)
     while True:
@@ -89,6 +89,7 @@ while True:
                 (nbre_de_joueurs, joueur0) = info_joueurs
                 if nbre_de_joueurs == 2:
                     cle = str(code_cree)
+                    connexions[cle] = {"j0": conn}
                     # games[cle] = {"0": joueur0}
                     # test = games[cle]["0"]
                     setup = split_cards(nbre_de_joueurs)
@@ -98,7 +99,7 @@ while True:
                     print(joueur0)
                     joueur1 = {'username': '', 'couleur': ''}
                     joueur1['deck_joueur'] = deck_joueur1
-                    joueur1['main_joueur'] = main_joueur0
+                    joueur1['main_joueur'] = main_joueur1
                     joueur0['defausse0'] = []
                     joueur0['defausse1'] = []
                     joueur0['defausse2'] = []
@@ -118,12 +119,17 @@ while True:
                     couleurs_restantes = couleurs
                     couleurs_restantes.remove(joueur0['couleur'])
                     print(couleurs_restantes)
+                    games[cle]["Couleurs_restantes"] = couleurs_restantes
                     test = games[cle]['1']['main_joueur']
                     print(len(test))
-                    to_send_to_j0 = (games[cle]["talon"], games[cle]['0']['deck_joueur'], games[cle]['0']['main_joueur'], games[cle]['0']['count'], games[cle]['1']['deck_joueur'][0], len(test), games[cle]['1']['count'] )
+                    to_send_to_j0 = (games[cle]["talon"], games[cle]['0']['deck_joueur'],
+                                     games[cle]['0']['main_joueur'], games[cle]['0']['count'],
+                                     games[cle]['1']['deck_joueur'][0], len(test), games[cle]['1']['count'])
                     print(to_send_to_j0)
                     depart = pickle.dumps(to_send_to_j0)
                     conn.send(depart)
+                    print(games)
+                    print(connexions)
             elif data == "join":
                 print("in")
                 ask = pickle.dumps("code?")
@@ -134,8 +140,29 @@ while True:
                 verif = games.get(str(code_recu))
                 if verif is not None:
                     print("yes")
+                    connexions[code_recu]["j1"] = conn
+                    print(connexions)
                     reponse = pickle.dumps("Yes")
                     conn.send(reponse)
+                    cle_recu = str(code_recu)
+                    commande = conn.recv(2048)
+                    commande_a_executer = pickle.loads(commande)
+                    print(commande_a_executer)
+                    if commande_a_executer == "couleurs":
+                        couleurs_restantes_pickled = pickle.dumps(games[cle_recu]["Couleurs_restantes"])
+                        conn.send(couleurs_restantes_pickled)
+                        j1_pickled = conn.recv(2048)
+                        j1 = pickle.loads(j1_pickled)
+                        print(j1)
+                        games[cle_recu]["1"]["username"] = j1["username"]
+                        games[cle_recu]["1"]["couleur"] = j1["couleur"]
+                        print(games)
+                        test2 = games[cle_recu]['0']['main_joueur']
+                        to_send_j1 = (games[cle_recu]["talon"], games[cle_recu]['1']['deck_joueur'],
+                                      games[cle_recu]['1']['main_joueur'], games[cle_recu]['1']['count'],
+                                      games[cle_recu]['1']['deck_joueur'][0], len(test2), games[cle_recu]['0']['count'])
+                        cartes_to_send = pickle.dumps(to_send_j1)
+                        conn.send(cartes_to_send)
                 else:
                     print("No")
                     reponse = pickle.dumps("No")
@@ -146,3 +173,9 @@ while True:
             break
     print("Connexion perdu")
     # conn.close()
+
+
+while True:
+    conn, addr = socket_de_connexion.accept()
+    print("Connecté à: ", addr)
+    start_new_thread(threaded_client, (conn,))
