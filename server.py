@@ -58,6 +58,70 @@ def split_cards(nbre):
         # print(paquet_de_carte_initial)
         setup = (player0, main0, player1, main1, paquet_de_carte_initial)
         return setup
+    elif nbre == 3:
+        print(3)
+        player0 = []
+        player1 = []
+        player2 = []
+        main0 = []
+        main1 = []
+        main2 = []
+        for i in range(30):
+            player0.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            player1.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            player2.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+        # print(player0)
+        # print(player1)
+        for j in range(5):
+            main0.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            main1.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            main2.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+        # print(main0)
+        # print(main1)
+        # print(paquet_de_carte_initial)
+        setup = (player0, main0, player1, main1, player2, main2,  paquet_de_carte_initial)
+        return setup
+    elif nbre == 4:
+        print(4)
+        player0 = []
+        player1 = []
+        player2 = []
+        player3 = []
+        main0 = []
+        main1 = []
+        main2 = []
+        main3 = []
+        for i in range(30):
+            player0.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            player1.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            player2.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            player3.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+        # print(player0)
+        # print(player1)
+        for j in range(5):
+            main0.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            main1.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            main2.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+            main3.append(paquet_de_carte_initial[0])
+            paquet_de_carte_initial.pop(0)
+        # print(main0)
+        # print(main1)
+        # print(paquet_de_carte_initial)
+        setup = (player0, main0, player1, main1, player2, main2, player3, main3, paquet_de_carte_initial)
+        return setup
 
 
 try:
@@ -67,6 +131,10 @@ except socket.error as e:
 
 socket_de_connexion.listen(4)
 print("Le server a démaré. \n En attente d'une connexion...")
+
+
+def game_play():
+    pass
 
 
 def threaded_client(conn):
@@ -125,6 +193,125 @@ def threaded_client(conn):
                     to_send_to_j0 = (games[cle]["talon"], games[cle]['0']['deck_joueur'],
                                      games[cle]['0']['main_joueur'], games[cle]['0']['count'],
                                      games[cle]['1']['deck_joueur'][0], len(test), games[cle]['1']['count'])
+                    print(to_send_to_j0)
+                    depart = pickle.dumps(to_send_to_j0)
+                    conn.send(depart)
+                    print(games)
+                    print(connexions)
+                elif nbre_de_joueurs == 3:
+                    cle = str(code_cree)
+                    connexions[cle] = {"j0": conn}
+                    # games[cle] = {"0": joueur0}
+                    # test = games[cle]["0"]
+                    setup = split_cards(nbre_de_joueurs)
+                    (deck_joueur0, main_joueur0, deck_joueur1, main_joueur1, deck_joueur2, main_joueur2, talon) = setup
+                    joueur0['deck_joueur'] = deck_joueur0
+                    joueur0['main_joueur'] = main_joueur0
+                    print(joueur0)
+                    joueur1 = {'username': '', 'couleur': ''}
+                    joueur2 = {'username': '', 'couleur': ''}
+                    joueur1['deck_joueur'] = deck_joueur1
+                    joueur1['main_joueur'] = main_joueur1
+                    joueur2['deck_joueur'] = deck_joueur2
+                    joueur2['main_joueur'] = main_joueur2
+                    joueur0['defausse0'] = []
+                    joueur0['defausse1'] = []
+                    joueur0['defausse2'] = []
+                    joueur0['defausse3'] = []
+                    joueur1['defausse0'] = []
+                    joueur1['defausse1'] = []
+                    joueur1['defausse2'] = []
+                    joueur1['defausse3'] = []
+                    joueur2['defausse0'] = []
+                    joueur2['defausse1'] = []
+                    joueur2['defausse2'] = []
+                    joueur2['defausse3'] = []
+                    joueur0['count'] = 30
+                    joueur1['count'] = 30
+                    joueur2['count'] = 30
+                    # games[cle] = {"0": joueur0}
+                    # games[cle] = {"1": joueur1}
+                    games[cle] = {"talon": talon}
+                    games[cle]['0'] = joueur0
+                    games[cle]['1'] = joueur1
+                    games[cle]['2'] = joueur2
+                    print(games[cle])
+                    couleurs_restantes = couleurs
+                    couleurs_restantes.remove(joueur0['couleur'])
+                    print(couleurs_restantes)
+                    games[cle]["Couleurs_restantes"] = couleurs_restantes
+                    test = games[cle]['1']['main_joueur']
+                    test2 = games[cle]['2']['main_joueur']
+                    print(len(test))
+                    to_send_to_j0 = (games[cle]["talon"], games[cle]['0']['deck_joueur'],
+                                     games[cle]['0']['main_joueur'], games[cle]['0']['count'],
+                                     games[cle]['1']['deck_joueur'][0], len(test), games[cle]['1']['count'],
+                                     games[cle]['2']['deck_joueur'][0], len(test2), games[cle]['2']['count'])
+                    print(to_send_to_j0)
+                    depart = pickle.dumps(to_send_to_j0)
+                    conn.send(depart)
+                    print(games)
+                    print(connexions)
+                elif nbre_de_joueurs == 4:
+                    cle = str(code_cree)
+                    connexions[cle] = {"j0": conn}
+                    # games[cle] = {"0": joueur0}
+                    # test = games[cle]["0"]
+                    setup = split_cards(nbre_de_joueurs)
+                    (deck_joueur0, main_joueur0, deck_joueur1, main_joueur1, deck_joueur2, main_joueur2, deck_joueur3, main_joueur3, talon) = setup
+                    joueur0['deck_joueur'] = deck_joueur0
+                    joueur0['main_joueur'] = main_joueur0
+                    print(joueur0)
+                    joueur1 = {'username': '', 'couleur': ''}
+                    joueur2 = {'username': '', 'couleur': ''}
+                    joueur3 = {'username': '', 'couleur': ''}
+                    joueur1['deck_joueur'] = deck_joueur1
+                    joueur1['main_joueur'] = main_joueur1
+                    joueur2['deck_joueur'] = deck_joueur2
+                    joueur2['main_joueur'] = main_joueur2
+                    joueur3['deck_joueur'] = deck_joueur3
+                    joueur3['main_joueur'] = main_joueur3
+                    joueur0['defausse0'] = []
+                    joueur0['defausse1'] = []
+                    joueur0['defausse2'] = []
+                    joueur0['defausse3'] = []
+                    joueur1['defausse0'] = []
+                    joueur1['defausse1'] = []
+                    joueur1['defausse2'] = []
+                    joueur1['defausse3'] = []
+                    joueur2['defausse0'] = []
+                    joueur2['defausse1'] = []
+                    joueur2['defausse2'] = []
+                    joueur2['defausse3'] = []
+                    joueur3['defausse0'] = []
+                    joueur3['defausse1'] = []
+                    joueur3['defausse2'] = []
+                    joueur3['defausse3'] = []
+                    joueur0['count'] = 30
+                    joueur1['count'] = 30
+                    joueur2['count'] = 30
+                    joueur3['count'] = 30
+                    # games[cle] = {"0": joueur0}
+                    # games[cle] = {"1": joueur1}
+                    games[cle] = {"talon": talon}
+                    games[cle]['0'] = joueur0
+                    games[cle]['1'] = joueur1
+                    games[cle]['2'] = joueur2
+                    games[cle]['3'] = joueur3
+                    print(games[cle])
+                    couleurs_restantes = couleurs
+                    couleurs_restantes.remove(joueur0['couleur'])
+                    print(couleurs_restantes)
+                    games[cle]["Couleurs_restantes"] = couleurs_restantes
+                    test = games[cle]['1']['main_joueur']
+                    test2 = games[cle]['2']['main_joueur']
+                    test3 = games[cle]['3']['main_joueur']
+                    print(len(test))
+                    to_send_to_j0 = (games[cle]["talon"], games[cle]['0']['deck_joueur'],
+                                     games[cle]['0']['main_joueur'], games[cle]['0']['count'],
+                                     games[cle]['1']['deck_joueur'][0], len(test), games[cle]['1']['count'],
+                                     games[cle]['2']['deck_joueur'][0], len(test2), games[cle]['2']['count'],
+                                     games[cle]['3']['deck_joueur'][0], len(test3), games[cle]['3']['count'])
                     print(to_send_to_j0)
                     depart = pickle.dumps(to_send_to_j0)
                     conn.send(depart)
